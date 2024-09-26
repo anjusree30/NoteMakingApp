@@ -102,6 +102,7 @@ function createNote() {
     displayNotes(); // Call a function to display notes
 }
 function searchNotes() {
+    
     const searchInputElement = document.getElementById('searchInput');
     const searchInput = searchInputElement.value.toLowerCase(); // Get the input value and convert it to lowercase
     const notes = JSON.parse(localStorage.getItem('notes')) || []; // Get notes from localStorage
