@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,6 +18,10 @@
             </div>
             <div class="blankDiv"></div>
             <div class="blankDiv"></div>
+        </div>
+        <div id="searchContainer">
+            <input type="text" id="searchInput" placeholder="Search notes..." oninput="searchNotes()">
+            <i class="fa-solid fa-magnifying-glass" id="searchIcon"></i>
         </div>
         <div id="list-container">
             <ul id="notes-list"></ul>

@@ -101,65 +101,85 @@ function createNote() {
     popupContainer.remove();
     displayNotes(); // Call a function to display notes
 }
+function searchNotes() {
+    const searchInputElement = document.getElementById('searchInput');
+    const searchInput = searchInputElement.value.toLowerCase(); // Get the input value and convert it to lowercase
+    const notes = JSON.parse(localStorage.getItem('notes')) || []; // Get notes from localStorage
 
-// function createNote(){
-//     const popupContainer=document.getElementById("popupContainer");
-//     const noteTitle=document.getElementById("note-title").value;
-//     const noteText=document.getElementById("note-text").value;
+    // Check if searchInput is not empty before filtering
+    const filteredNotes = notes.filter(note => 
+        (note.title && note.title.toLowerCase().includes(searchInput)) || 
+        (note.text && note.text.toLowerCase().includes(searchInput))
+    );
 
-//     const titleErrorContainer=document.getElementById("titleErrorContainer");
-//     titleErrorContainer.innerHTML = '';
-//     if (noteTitle === '') {
-//         const errorMessage = document.createElement('span'); // Create a new error message dynamically
-//         errorMessage.style.color = 'red';
-//         errorMessage.textContent = 'Title is required to create a note.';
-        
-//         titleErrorContainer.appendChild(errorMessage); // Insert the error message below the input
-       
-//         return; // Stop execution if title is empty
-//     } else {
-      
+    displayNotes(filteredNotes); // Call displayNotes with filtered notes
+}
+
+function displayNotes(filteredNotes = null) {
+    const notesList = document.getElementById('notes-list');
+    notesList.innerHTML = '';  // Clear existing notes
     
-//     if (noteText.trim()!==''||noteTitle.trim()!==''){
-//         const note={
-//             id:new Date().getTime(),
-//             title:noteTitle,
-//             text:noteText
-//         }
-//         const existingNotes=JSON.parse(localStorage.getItem('notes'))||[];
-//         existingNotes.push(note);
-//         localStorage.setItem('notes',JSON.stringify(existingNotes));
-//         document.getElementById('note-text').value='';
-//         document.getElementById('note-title').value='';
-
-//         popupContainer.remove();
-//         displayNotes();
-
-//     }
-// }
-
-// }
-function displayNotes(){
-    const notesList=document.getElementById('notes-list');
-    notesList.innerHTML='';
-    const notes=JSON.parse(localStorage.getItem('notes'))||[];
-    notes.forEach(note => {
-        const listItem=document.createElement('li');
-        listItem.innerHTML=`
-         <h3>${note.title}</h3>
-        <span >
-        ${note.text} ${note.image ? `<img src="${note.image}" alt="Note Image" style="width: 50px; height: 50px; display: block; margin-top: 5px;">` : ''}</span>
-       
-   
-        <div id="noteBtns-container">
-      
-        <button id="editBtn" onclick="editNote(${note.id})"><i class="fa-solid fa-pen"></i></button>
-        <button id="deleteBtn" onclick="deleteNote(${note.id})"><i class="fa-solid fa-trash"></i></button>
-        </div>
+    const notes = filteredNotes || JSON.parse(localStorage.getItem('notes')) || [];  // Retrieve notes from localStorage
+    
+    // Separate pinned and unpinned notes
+    const pinnedNotes = notes.filter(note => note.pinned);
+    const unpinnedNotes = notes.filter(note => !note.pinned);
+    const createNoteItem = (note) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+            <div id="titleWithPin" style="display: flex; justify-content: space-between; align-items: center;">
+                <h3>${note.title}</h3>
+                <button id="pinBtn" onclick="togglePin(${note.id})">
+                    ${note.pinned ? '<i class="fa-solid fa-thumbtack" style="transform: rotate(180deg);"></i>' : '<i class="fa-solid fa-thumbtack"></i>'}
+                </button>
+            </div>
+            <span>
+                ${note.text} 
+                ${note.image ? `<img src="${note.image}" alt="Note Image" style="width: 50px; height: 50px; display: block; margin-top: 5px;">` : ''}
+            </span>
+            <div id="noteBtns-container">
+                <button id="editBtn" onclick="editNote(${note.id})"><i class="fa-solid fa-pen"></i></button>
+                <button id="deleteBtn" onclick="deleteNote(${note.id})"><i class="fa-solid fa-trash"></i></button>
+            </div>
         `;
+        return listItem;  // Return the constructed list item
+    };
+    
+    
+    // Display pinned notes first
+    pinnedNotes.forEach(note => {
+        const listItem = createNoteItem(note);
+       
+        notesList.appendChild(listItem);  // Append pinned notes to the list
+    });
+    
+    // Then display unpinned notes
+    unpinnedNotes.forEach(note => {
+        const listItem = createNoteItem(note);
+       
         notesList.appendChild(listItem);
+       
     });
 }
+
+function togglePin(noteId) {
+    const notes = JSON.parse(localStorage.getItem('notes')) || [];
+    
+    // Find the note by its id and toggle its pinned status
+    const updatedNotes = notes.map(note => {
+        if (note.id === noteId) {
+            note.pinned = !note.pinned;
+        }
+        return note;
+    });
+    
+    // Save the updated notes back to localStorage
+    localStorage.setItem('notes', JSON.stringify(updatedNotes));
+    
+    // Re-display the notes
+    displayNotes();
+}
+
 let uploadedEditImage = null; // Store the uploaded image for editing
 
 function editNote(noteId) {

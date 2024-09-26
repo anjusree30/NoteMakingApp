@@ -22,6 +22,31 @@ body {
     justify-content: center;
     overflow-y: scroll;
 }
+#searchContainer {
+   
+    position: relative; /* Position relative to position the icon */
+    width: 70%; /* Adjust to your layout needs */
+    margin: 0 auto;
+}
+
+#searchInput {
+    width: 100%; /* Full width */
+    padding: 10px 60px 10px 60px; /* Add space for the icon and padding */
+    border: 2px solid #8c53ff;
+    border-radius: 50px;
+    height :50px;
+}
+
+#searchIcon {
+    position: absolute; /* Positioning inside the input */
+    left: 20px; /* Adjust this value to position the icon */
+    margin-right: 20px;
+    top: 50%; /* Center the icon vertically */
+    transform: translateY(-50%); /* Adjust for vertical centering */
+    color: #888; /* Color of the icon */
+    pointer-events: none; /* Prevent clicks on the icon */
+}
+
 #list-header{
     display: flex;
     align-items: left;
@@ -113,7 +138,38 @@ li {
   font-size: 12px;
   width: 60px;
   height:30px;
+}#pinBtn {
+    margin-left: 10px;  /* Ensure gap between title and pin button */
+    background: none;  /* No default background for the button */
+    border: none;  /* No border for the button */
+    cursor: pointer;  /* Pointer cursor to indicate it's clickable */
 }
+
+#pinBtn i {
+    font-size: 18px; /* Adjust icon size if needed */
+}
+
+#pinBtn:hover {
+    color: #ff8c00; /* Change color on hover for feedback */
+    transform: scale(1.1); /* Slightly increase size on hover for effect */
+}
+
+#pinBtn:active {
+    transform: scale(0.9); /* Slightly reduce size on click */
+}
+#titleWithPin {
+    display: flex;  /* Use flexbox to align the elements */
+    justify-content: space-between;  /* Add space between title and button */
+    align-items: center;  /* Center the items vertically */
+    width: 100%;  /* Full width */
+    margin-bottom:30px ;
+}
+
+#titleWithPin h3 {
+    margin: 0;  /* Remove default margin on h3 */
+    flex-grow: 1;  /* Make the title grow to fill space */
+}
+
 
 #editBtn {
   background-color: gainsboro;
