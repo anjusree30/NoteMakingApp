@@ -29,6 +29,26 @@ body {
     margin: 0 auto;
 }
 
+#cancelWithImage{
+    padding-top: 20px;
+    position: relative;
+   display: flex;
+    justify-content: start;
+    flex-direction: column;
+width: fit-content;
+
+}
+#cancelWithImage i{
+    position: absolute;
+    top: -5px; /* Adjust based on your preference */
+    right: -10px; /* Adjust based on your preference */
+    cursor: pointer;
+    color: red; /* You can change the color */
+    font-size: 20px; /* Adjust the size of the icon */
+    background: white; /* Add background for better visibility */
+    border-radius: 50%; /* Optional: to make it circular */
+    padding: 5px; 
+}
 
 #searchInput {
     width: 100%; /* Full width */

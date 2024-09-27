@@ -7,6 +7,7 @@ function popup() {
     <div id="titleErrorContainer"></div>
     <textarea id="note-text" placeholder="Enter your note content..."></textarea>
     <input type="file" id="note-image" accept="image/*" onchange="uploadImage()" style="margin-top: 10px;">
+    <div id="imagePreviewContainer" style="margin-top: 10px;"></div>
     <div id="btn-container">
     <button id="submitBtn" onclick="createNote()">Create Note</button>
     <button id ="closeBtn" onclick="closePopup()">Close</button>
@@ -26,37 +27,66 @@ function closePopup(){
     if(popupContainer){
         popupContainer.remove();
     }
-}let uploadedImage = null; // Global variable to store the uploaded image
-let imgPreview = null;    // Variable to store the image preview element
+}let uploadedImage = null; // Store uploaded image data
+let imgPreview = null; // Reference to image preview element
 
 function uploadImage() {
     const imageInput = document.getElementById("note-image");
     const file = imageInput.files[0]; // Get the selected file
+    const imagePreviewContainer = document.getElementById("imagePreviewContainer");
+
+    // Clear the previous preview (if any)
+    imagePreviewContainer.innerHTML = '';
 
     if (file) {
         const reader = new FileReader();
 
         reader.onload = function (event) {
             uploadedImage = event.target.result; // Store the image data
-            
-            // If there's an existing preview, remove it first
-            if (imgPreview) {
-                imgPreview.remove();
-            }
+
+            // Create the image preview container
+            const imgWrapper = document.createElement("div");
+            imgWrapper.style.position = "relative";
+            imgWrapper.style.display = "inline-block";
+            imgWrapper.style.marginTop = "20px"; // Add some space above the image preview
 
             // Create the image preview element
             imgPreview = document.createElement("img");
             imgPreview.src = uploadedImage;
             imgPreview.style.maxWidth = "200px"; // Set max width for preview
-            imgPreview.style.marginTop = "10px";
+            imgPreview.style.maxHeight = "200px"; // Set max height for preview
+            imgPreview.style.display = "block"; // Ensure it's block level for margin
 
-            // Append the image preview to the container
-            document.getElementById("popupContainer").appendChild(imgPreview);
+            // Create the "remove" icon (a '✖' symbol in this case)
+            const removeIcon = document.createElement("span");
+            removeIcon.innerHTML = "&#10006;"; // This is the '✖' symbol
+            removeIcon.style.position = "absolute";
+            removeIcon.style.top = "-30px"; // Position it above the image
+            removeIcon.style.right = "0px"; // Align to the right of the image
+            removeIcon.style.cursor = "pointer";
+            removeIcon.style.color = "red";
+            removeIcon.style.fontSize = "20px";
+            removeIcon.style.fontWeight = "bold";
+
+            // Handle image removal when the icon is clicked
+            removeIcon.onclick = function () {
+                uploadedImage = null; // Reset uploaded image
+                imgWrapper.remove(); // Remove the image wrapper (which contains the preview and the icon)
+                imageInput.value = ''; // Clear the file input
+            };
+
+            // Append the image and the remove icon to the image wrapper
+            imgWrapper.appendChild(imgPreview);
+            imgWrapper.appendChild(removeIcon);
+
+            // Append the image wrapper to the container
+            imagePreviewContainer.appendChild(imgWrapper);
         };
 
         reader.readAsDataURL(file); // Read the image file
     }
 }
+
 
 function createNote() {
     const popupContainer = document.getElementById("popupContainer");
@@ -102,7 +132,7 @@ function createNote() {
     displayNotes(); // Call a function to display notes
 }
 function searchNotes() {
-    
+
     const searchInputElement = document.getElementById('searchInput');
     const searchInput = searchInputElement.value.toLowerCase(); // Get the input value and convert it to lowercase
     const notes = JSON.parse(localStorage.getItem('notes')) || []; // Get notes from localStorage
@@ -182,7 +212,7 @@ function togglePin(noteId) {
 }
 
 let uploadedEditImage = null; // Store the uploaded image for editing
-
+let isImageRemoved = false;
 function editNote(noteId) {
     const notes = JSON.parse(localStorage.getItem('notes')) || [];
     const noteToEdit = notes.find(note => note.id == noteId);
@@ -197,7 +227,11 @@ function editNote(noteId) {
             <h1>Edit Note</h1>
             <input type="text" id="note-title-edit" value="${noteTitle}" placeholder="Enter note title...">
             <textarea id="note-text-edit">${noteText}</textarea>
+            <div id="cancelWithImage">
+              ${noteImage ? `<i class="fas fa-times" onclick="removeImage()"></i>` : ''}
             ${noteImage ? `<img src="${noteImage}" alt="Note Image" id="existing-image" style="width: 50px; height: 50px;">` : ''}
+           
+             </div>
             <input type="file" id="note-image-edit" accept="image/*" onchange="uploadEditImage()">
             <div id="btn-container">
                 <button id="submitBtn" onclick="updateNote(${noteId})">Done</button>
@@ -206,6 +240,23 @@ function editNote(noteId) {
         </div>
     `;
     document.body.appendChild(editingPopup);
+}function removeImage() {
+    isImageRemoved = true;
+    const imgPreview = document.getElementById("existing-image");
+    if (imgPreview) {
+        imgPreview.remove(); // Remove the image preview
+        uploadedEditImage = null; // Clear the uploaded image variable
+    }
+
+    // Remove the cancel icon itself
+    const closeIcon = document.querySelector("#cancelWithImage i");
+    if (closeIcon) {
+        closeIcon.remove();
+    }
+    const imageInput = document.getElementById("note-image-edit");
+    if (imageInput) {
+        imageInput.value = ""; // Reset the file input field to clear the chosen file
+    }
 }
 
 function uploadEditImage() {
@@ -217,22 +268,33 @@ function uploadEditImage() {
         reader.onload = function (event) {
             uploadedEditImage = event.target.result; // Store the new uploaded image
             const imgPreview = document.getElementById("existing-image");
+            const cancelIcon = document.querySelector("#cancelWithImage i");
 
             if (imgPreview) {
                 imgPreview.src = uploadedEditImage; // Update existing image preview
             } else {
-                // If no image existed previously, create a new img element
+                // Create a new img element
                 const newImgPreview = document.createElement("img");
                 newImgPreview.src = uploadedEditImage;
+                newImgPreview.id = "existing-image";
                 newImgPreview.style.width = "100px";
                 newImgPreview.style.height = "100px";
-                document.getElementById("editing-container").appendChild(newImgPreview);
+                document.getElementById("cancelWithImage").appendChild(newImgPreview);
+            }
+
+            // Show the cancel icon when an image is uploaded
+            if (!cancelIcon) {
+                const removeIcon = document.createElement("i");
+                removeIcon.classList.add("fas", "fa-times");
+                removeIcon.onclick = removeImage;
+                document.getElementById("cancelWithImage").appendChild(removeIcon);
             }
         };
 
         reader.readAsDataURL(file); // Read the image file
     }
 }
+
 function closeEditPopup(){
     const editingPopup=document.getElementById("editing-container");
     if(editingPopup){
@@ -257,7 +319,7 @@ function closeEditPopup(){
                     id: note.id,
                     title: updatedTitle,  // Updated title
                     text: updatedText,    // Updated text
-                    image: uploadedEditImage || note.image // Keep original image if not updated
+                    image:isImageRemoved?null:( uploadedEditImage || note.image) // Keep original image if not updated
                 };
             }
             return note;
@@ -265,7 +327,7 @@ function closeEditPopup(){
         
         // Store the updated notes back in localStorage
         localStorage.setItem('notes', JSON.stringify(updatedNotes));
-        
+        isImageRemoved=false;
         // Remove the editing popup and refresh the notes display
         editingPopup.remove();
         displayNotes();
